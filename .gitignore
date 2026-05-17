@@ -1,0 +1,149 @@
+# ==========================================
+# Peblo Notes Monorepo Git Ignore
+# ==========================================
+
+# OS/System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ==========================================
+# Frontend (Next.js) Ignore Rules
+# ==========================================
+# dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+out/
+build/
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local env files (do not commit secrets!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel/
+
+# ==========================================
+# Backend (FastAPI / Python) Ignore Rules
+# ==========================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions
+*.pyd
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / Coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.pytest_cache/
+.hypothesis/
+.ruamel_yaml_bak/
+
+# Translations
+*.mo
+*.pot
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+.ipython/
+
+# pyenv
+.python-version
+
+# venv (Virtual environments)
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyder-py3
+
+# Rope project settings
+.ropeproject
+
+# mypy
+.mypy_cache/
+.pyre/
+.gerry/
+
+# Strict backend environment & secret files
+backend/.env
+backend/*.json
+!backend/package.json
+!backend/tsconfig.json
+!backend/jsconfig.json
+!backend/.env.example
+
+# Temporary/Backup files
+*~
+*.bak
+*.swp
+*.tmp
