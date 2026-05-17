@@ -19,38 +19,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Mock Routers for Scaffold ---
-# In a real app, these would be in separate files under app/routers/
-from fastapi import APIRouter
+# --- Real Routers ---
+from app.routers.auth import router as auth_router
+from app.routers.notes import router as notes_router
+from app.routers.ai import router as ai_router
 
-auth_router = APIRouter(prefix="/auth", tags=["Auth"])
-notes_router = APIRouter(prefix="/notes", tags=["Notes"])
-share_router = APIRouter(prefix="/share", tags=["Share"])
-insights_router = APIRouter(prefix="/insights", tags=["Insights"])
+from app.routers.share import router as share_router
+from app.routers.insights import router as insights_router
 
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
-@auth_router.post("/verify")
-async def verify_token():
-    return {"message": "Token verified"}
-
-@notes_router.get("/")
-async def get_notes():
-    return {"notes": []}
-
-@share_router.get("/{share_id}")
-async def get_shared_note(share_id: str):
-    return {"share_id": share_id, "note": {}}
-
-@insights_router.get("/")
-async def get_insights():
-    return {"insights": {}}
-
 # Register routers
 app.include_router(auth_router)
 app.include_router(notes_router)
+app.include_router(ai_router)
 app.include_router(share_router)
 app.include_router(insights_router)
 

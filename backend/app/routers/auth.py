@@ -1,12 +1,8 @@
 from fastapi import APIRouter, Depends
-from firebase_admin import firestore
 from app.middleware.auth import get_current_user
+from app.services.firestore_service import db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-# Initialize Firestore client
-# Assuming firebase_admin is initialized in middleware/auth.py or main.py
-db = firestore.client()
 
 @router.post("/me")
 async def get_me(user: dict = Depends(get_current_user)):

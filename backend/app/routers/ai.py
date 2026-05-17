@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timezone
-from google.cloud.firestore_v1 import firestore
+from firebase_admin import firestore
 
 from app.middleware.auth import get_current_user
 from app.services.firestore_service import db

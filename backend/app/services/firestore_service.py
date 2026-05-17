@@ -1,9 +1,33 @@
 from firebase_admin import firestore
 from datetime import datetime, timezone
 import re
+import os
 from typing import List, Dict, Any
 
-db = firestore.client()
+# Lazy-loaded Firestore proxy to avoid startup crashes if Firebase is not yet configured
+class FirestoreProxy:
+    def __init__(self):
+        self._client = None
+
+    @property
+    def client(self):
+        if self._client is None:
+            try:
+                self._client = firestore.client()
+            except Exception as e:
+                print("\n" + "="*80)
+                print("WARNING: Firebase Credentials are not configured or are invalid!")
+                print("To run fully functional, please place your 'firebase-adminsdk.json' in the")
+                print("backend/ directory and fill in your .env / .env.local configurations.")
+                print(f"Error details: {e}")
+                print("="*80 + "\n")
+                raise e
+        return self._client
+
+    def __getattr__(self, name):
+        return getattr(self.client, name)
+
+db = FirestoreProxy()
 
 def strip_html_tags(text: str) -> str:
     clean = re.compile('<.*?>')

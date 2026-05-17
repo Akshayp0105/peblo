@@ -9,6 +9,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { notesApi, Note } from "@/lib/notesApi";
+import { ShareModal } from "@/components/notes/ShareModal";
 import { TagInput } from "@/components/notes/TagInput";
 import {
   ChevronLeft,
@@ -33,6 +34,10 @@ export default function NoteEditorPage() {
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [category, setCategory] = useState<string | null>(null);
+
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [viewCount, setViewCount] = useState(0);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [saveStatus, setSaveStatus] = useState<"Saved" | "Saving..." | "">("");
@@ -71,6 +76,13 @@ export default function NoteEditorPage() {
       if (category === null && note.category) setCategory(note.category);
       if (editor && editor.getHTML() !== note.content && !editor.isFocused) {
         editor.commands.setContent(note.content);
+      }
+      // Sync share state from note
+      if ((note as any).share_id) {
+        setShareUrl(`${window.location.origin}/shared/${(note as any).share_id}`);
+      }
+      if ((note as any).view_count !== undefined) {
+        setViewCount((note as any).view_count);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -338,8 +350,13 @@ export default function NoteEditorPage() {
 
         {/* Footer Actions */}
         <div className="p-4 border-t border-border space-y-2 bg-card">
-          <button className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md text-sm font-medium transition-colors">
-            <Share2 className="h-4 w-4" /> Share Note
+          <button
+            id="note-share-btn"
+            onClick={() => setIsShareModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md text-sm font-medium transition-colors"
+          >
+            <Share2 className="h-4 w-4" />
+            {shareUrl ? "Manage Share" : "Share Note"}
           </button>
           <button 
             onClick={handleArchive}
@@ -349,6 +366,17 @@ export default function NoteEditorPage() {
           </button>
         </div>
       </aside>
+
+      {/* Share Modal */}
+      <ShareModal
+        noteId={id}
+        noteTitle={title}
+        initialShareUrl={shareUrl}
+        initialViewCount={viewCount}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        onShareChange={(url) => setShareUrl(url)}
+      />
     </div>
   );
 }
