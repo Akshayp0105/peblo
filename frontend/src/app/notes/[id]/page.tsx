@@ -3,7 +3,8 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useNote } from "@/hooks/useNotes";
-import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import TaskList from "@tiptap/extension-task-list";
@@ -288,6 +289,7 @@ export default function NoteEditorPage() {
           />
           
           {editor && (
+            // @ts-ignore
             <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }} className="flex bg-popover border border-border shadow-lg rounded-lg overflow-hidden p-1 gap-1">
               <button
                 onClick={() => editor.chain().focus().toggleBold().run()}
