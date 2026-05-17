@@ -29,6 +29,67 @@ def get_notes(user_id: str, is_archived: bool = False) -> List[Dict[str, Any]]:
     notes.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
     return notes
 
+def search_notes(user_id: str, q: str = None, tags: str = None, status: str = None, sort: str = 'recent', cursor: str = None, limit: int = 20) -> List[Dict[str, Any]]:
+    notes_ref = db.collection('notes')
+    query = notes_ref.where('user_id', '==', user_id)
+
+    # Status mapping (active = not archived, archived = archived, all = no filter)
+    if status == 'active':
+        query = query.where('is_archived', '==', False)
+    elif status == 'archived':
+        query = query.where('is_archived', '==', True)
+
+    # Tags filtering
+    # Firestore supports ONE array_contains per query
+    tag_list = [t.strip() for t in tags.split(',')] if tags else []
+    if tag_list:
+        # Use array_contains for the first tag
+        query = query.where('tags', 'array_contains', tag_list[0])
+
+    # Sorting
+    if sort == 'recent':
+        query = query.order_by('updated_at', direction=firestore.Query.DESCENDING)
+    elif sort == 'oldest':
+        query = query.order_by('updated_at', direction=firestore.Query.ASCENDING)
+    elif sort == 'alphabetical':
+        query = query.order_by('title', direction=firestore.Query.ASCENDING)
+    
+    # Cursor logic for pagination
+    if cursor:
+        try:
+            # Assuming cursor is a document ID, fetch the document to start after
+            cursor_doc = notes_ref.document(cursor).get()
+            if cursor_doc.exists:
+                query = query.start_after(cursor_doc)
+        except Exception:
+            pass
+
+    # Execute the query
+    docs = query.stream()
+    
+    notes = []
+    for doc in docs:
+        data = doc.to_dict()
+        data['id'] = doc.id
+        notes.append(data)
+
+    # In-memory filtering for additional tags and search query
+    # Since Firestore only supports one array_contains and no text search out-of-the-box
+    if len(tag_list) > 1:
+        # Filter notes that have ALL the requested tags
+        notes = [n for n in notes if all(t in n.get('tags', []) for t in tag_list[1:])]
+        
+    if q:
+        query_lower = q.lower()
+        notes = [n for n in notes if 
+                 query_lower in n.get('title', '').lower() or 
+                 query_lower in n.get('content', '').lower() or
+                 any(query_lower in str(t).lower() for t in n.get('tags', []))]
+                 
+    # Since we did in-memory filtering, we should limit after filtering
+    return notes[:limit]
+
+
 def create_note(user_id: str, data: dict) -> Dict[str, Any]:
     now = datetime.now(timezone.utc).isoformat()
     doc_ref = db.collection('notes').document()

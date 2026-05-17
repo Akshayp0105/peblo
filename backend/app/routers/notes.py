@@ -41,6 +41,30 @@ async def create_note(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/search", response_model=List[NoteResponse])
+async def search_notes(
+    q: Optional[str] = None,
+    tags: Optional[str] = None,
+    status: Optional[str] = "all",
+    sort: Optional[str] = "recent",
+    cursor: Optional[str] = None,
+    user: dict = Depends(get_current_user)
+):
+    try:
+        notes = firestore_service.search_notes(
+            user_id=user['uid'],
+            q=q,
+            tags=tags,
+            status=status,
+            sort=sort,
+            cursor=cursor,
+            limit=20
+        )
+        return notes
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{note_id}", response_model=NoteResponse)
 async def get_note(
     note_id: str,
