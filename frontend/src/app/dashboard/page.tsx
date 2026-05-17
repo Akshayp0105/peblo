@@ -6,6 +6,7 @@ import { NoteCard } from "@/components/notes/NoteCard";
 import { Plus, Search, LayoutGrid, List as ListIcon, Menu, FileText, Archive as ArchiveIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getTagColor, getTagBgColor } from "@/components/notes/TagInput";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function DashboardPage() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -138,6 +139,7 @@ export default function DashboardPage() {
               <ListIcon className="h-4 w-4" />
             </button>
           </div>
+          <ThemeToggle />
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">

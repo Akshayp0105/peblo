@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Notes Collection Rules
+    match /notes/{noteId} {
+      // Users can read/write their own notes
+      allow read, write: if isOwner(resource.data.user_id) || isOwner(request.resource.data.user_id);
+      
+      // Allow reading if the note has a share record associated with it, 
+      // but typically we read public notes via a separate service or function.
+      // If we need client-side read access for public notes:
+      allow read: if resource.data.is_public == true;
+    }
+
+    // Shares Collection Rules (for Public URLs)
+    match /shares/{shareId} {
+      // Anyone can read a public share record to resolve the note
+      allow read: if true;
+      // Only the note owner can create/update/delete the share
+      allow write: if isOwner(request.resource.data.owner_id) || isOwner(resource.data.owner_id);
+    }
+
+    // Users Collection Rules
+    match /users/{userId} {
+      // Users can read and write only their own profile data
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

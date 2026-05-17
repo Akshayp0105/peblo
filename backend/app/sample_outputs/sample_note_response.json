@@ -1,0 +1,12 @@
+{
+  "id": "abc-123-def",
+  "user_id": "user_789",
+  "title": "Meeting Notes: Q3 Planning",
+  "content": "<p>Discussed the roadmap for Q3. Key focus areas are AI integration and performance optimization.</p>",
+  "excerpt": "Discussed the roadmap for Q3. Key focus areas are AI...",
+  "tags": ["meeting", "planning", "q3"],
+  "category": "Work",
+  "is_archived": false,
+  "created_at": "2026-05-17T10:00:00Z",
+  "updated_at": "2026-05-17T10:30:00Z"
+}

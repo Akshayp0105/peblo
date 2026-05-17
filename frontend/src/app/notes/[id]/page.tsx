@@ -22,8 +22,16 @@ import {
   Italic,
   List,
   Code,
-  CheckSquare
+  CheckSquare,
+  Eye,
+  Edit3,
+  HelpCircle
 } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function NoteEditorPage() {
   const params = useParams();
@@ -41,6 +49,9 @@ export default function NoteEditorPage() {
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [saveStatus, setSaveStatus] = useState<"Saved" | "Saving..." | "">("");
+  
+  const [isPreview, setIsPreview] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   
   // AI State
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -115,6 +126,40 @@ export default function NoteEditorPage() {
       }
     }, 1500);
   }, [updateNote]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      // Cmd/Ctrl + S
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        triggerSave({ title, content: editor?.getHTML() || "", tags, category: category || "" });
+      }
+      // Cmd/Ctrl + Shift + N
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        try {
+          const newNote = await notesApi.createNote({});
+          router.push(`/notes/${newNote.id}`);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      // Cmd/Ctrl + /
+      if ((e.metaKey || e.ctrlKey) && e.key === "/") {
+        e.preventDefault();
+        setIsSidebarOpen(prev => !prev);
+      }
+      // ? (Help modal)
+      if (e.key === "?" && e.shiftKey && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement) && !(e.target as HTMLElement).isContentEditable) {
+        e.preventDefault();
+        setShowHelp(prev => !prev);
+      }
+    };
+    
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [title, editor, tags, category, triggerSave, router]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newTitle = e.target.value;
@@ -200,12 +245,36 @@ export default function NoteEditorPage() {
               </span>
             </div>
           </div>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-md hover:bg-muted text-muted-foreground transition-colors lg:hidden"
-          >
-            {isSidebarOpen ? <PanelRightClose className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <div className="flex bg-muted p-1 rounded-md">
+              <button
+                onClick={() => setIsPreview(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm transition-colors ${!isPreview ? 'bg-background shadow-sm text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Edit3 className="h-4 w-4" /> Edit
+              </button>
+              <button
+                onClick={() => setIsPreview(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm transition-colors ${isPreview ? 'bg-background shadow-sm text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Eye className="h-4 w-4" /> Preview
+              </button>
+            </div>
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 rounded-md hover:bg-muted text-muted-foreground transition-colors lg:hidden"
+            >
+              {isSidebarOpen ? <PanelRightClose className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
+            </button>
+            <button
+              onClick={() => setShowHelp(true)}
+              className="p-2 rounded-md hover:bg-muted text-muted-foreground transition-colors hidden lg:block"
+              title="Keyboard Shortcuts"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </button>
+          </div>
         </header>
 
         {/* Editor Content */}
@@ -254,7 +323,32 @@ export default function NoteEditorPage() {
             </BubbleMenu>
           )}
 
-          <EditorContent editor={editor} className="min-h-[50vh]" />
+          {isPreview ? (
+            <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none dark:prose-invert min-h-[500px]">
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code(props) {
+                    const {children, className, node, ...rest} = props;
+                    const match = /language-(\w+)/.exec(className || '');
+                    const code = String(children).replace(/\n$/, '');
+                    if (match && hljs.getLanguage(match[1])) {
+                      return (
+                        <code className={className} dangerouslySetInnerHTML={{__html: hljs.highlight(code, {language: match[1]}).value}} />
+                      )
+                    }
+                    return <code className={className} {...rest}>{children}</code>
+                  }
+                }}
+              >
+                {/* Note: since Tiptap stores HTML, rendering it directly via ReactMarkdown will escape tags. 
+                    If user typed markdown, it works. For a full implementation, we'd use turndown to convert HTML -> MD. */}
+                {editor ? editor.getText() : note?.content || ""}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <EditorContent editor={editor} className="min-h-[50vh]" />
+          )}
         </div>
       </main>
 
@@ -377,6 +471,43 @@ export default function NoteEditorPage() {
         onClose={() => setIsShareModalOpen(false)}
         onShareChange={(url) => setShareUrl(url)}
       />
+
+      {/* Help Modal */}
+      {showHelp && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowHelp(false)}>
+          <div className="bg-card p-6 rounded-xl shadow-xl w-full max-w-md border border-border" onClick={e => e.stopPropagation()}>
+            <h3 className="text-xl font-bold mb-4">Keyboard Shortcuts</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Command Palette</span>
+                <kbd className="px-2 py-1 bg-muted rounded text-sm font-mono">Cmd/Ctrl + K</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Force Save</span>
+                <kbd className="px-2 py-1 bg-muted rounded text-sm font-mono">Cmd/Ctrl + S</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">New Note</span>
+                <kbd className="px-2 py-1 bg-muted rounded text-sm font-mono">Cmd/Ctrl + Shift + N</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Toggle AI Sidebar</span>
+                <kbd className="px-2 py-1 bg-muted rounded text-sm font-mono">Cmd/Ctrl + /</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Show Shortcuts</span>
+                <kbd className="px-2 py-1 bg-muted rounded text-sm font-mono">Shift + ?</kbd>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowHelp(false)}
+              className="mt-6 w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,21 @@
+{
+  "total_notes": 42,
+  "archived_notes": 5,
+  "tags_count": {
+    "work": 15,
+    "ideas": 12,
+    "personal": 8,
+    "meeting": 7
+  },
+  "recent_activity": [
+    { "date": "2026-05-10", "count": 2 },
+    { "date": "2026-05-11", "count": 5 },
+    { "date": "2026-05-12", "count": 1 },
+    { "date": "2026-05-13", "count": 0 },
+    { "date": "2026-05-14", "count": 3 },
+    { "date": "2026-05-15", "count": 4 },
+    { "date": "2026-05-16", "count": 2 }
+  ],
+  "writing_streak": 3,
+  "ai_insights_used": 18
+}

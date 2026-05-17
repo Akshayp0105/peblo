@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #8B5CF6;
+  --color-primary-hover: #7C3AED;
+  --color-background-light: #F9FAFB;
+  --color-background-dark: #0F1117;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+  }
+
+  .dark {
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 40% 98%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: theme('colors.gray.200');
+  }
+  .dark * {
+    border-color: theme('colors.gray.800');
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
