@@ -1,6 +1,6 @@
 # Peblo Notes
 
-> AI-powered, elegant note-taking workspace.
+> AI-powered engine , elegant note-taking workspace.
 
 Peblo Notes is a sophisticated, full-stack application designed to elevate your note-taking experience. It seamlessly blends a premium, distraction-free aesthetic with powerful AI capabilities, allowing you to not just write, but to understand, organize, and share your thoughts effortlessly.
 
