@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useNotes } from "@/hooks/useNotes";
 import { NoteCard } from "@/components/notes/NoteCard";
-import { Plus, Search, LayoutGrid, List as ListIcon, Menu, FileText, Archive as ArchiveIcon } from "lucide-react";
+import { Plus, Search, LayoutGrid, List as ListIcon, Menu, FileText, Archive as ArchiveIcon, BarChart3 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getTagColor, getTagBgColor } from "@/components/notes/TagInput";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -79,6 +79,13 @@ export default function DashboardPage() {
             >
               <ArchiveIcon className="h-4 w-4" />
               Archived
+            </button>
+            <button
+              onClick={() => { router.push("/dashboard/insights"); setSidebarOpen(false); }}
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:bg-muted"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Insights
             </button>
           </nav>
 
