@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { notesApi } from "@/lib/notesApi";
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +23,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (currentUser) {
         const token = await currentUser.getIdToken();
         document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Strict`;
+        
+        // Sync user profile with Firestore backend
+        try {
+          await notesApi.syncUser();
+        } catch (err) {
+          console.error("Failed to sync user profile with backend:", err);
+        }
       } else {
         document.cookie = `firebase-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
       }
