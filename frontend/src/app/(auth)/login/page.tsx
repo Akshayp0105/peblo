@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles, Mail, Lock, Loader2 } from "lucide-react";
 import { signInWithEmail, signInWithGoogle } from "@/lib/auth";
+import { notesApi } from "@/lib/notesApi";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -39,12 +40,8 @@ export default function LoginPage() {
     try {
       setError(null);
       const cred = await signInWithEmail(data.email, data.password);
-      const token = await cred.user.getIdToken();
       // Sync user data with backend just in case
-      await fetch("http://localhost:8000/auth/sync", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      }).catch(console.error); // We don't want to block login if sync fails
+      await notesApi.syncUser().catch(console.error); // We don't want to block login if sync fails
       
       router.push("/dashboard");
     } catch (err: any) {
@@ -57,12 +54,7 @@ export default function LoginPage() {
       setIsLoadingGoogle(true);
       setError(null);
       const cred = await signInWithGoogle();
-      const token = await cred.user.getIdToken();
-      
-      await fetch("http://localhost:8000/auth/sync", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      }).catch(console.error);
+      await notesApi.syncUser().catch(console.error);
       
       router.push("/dashboard");
     } catch (err: any) {

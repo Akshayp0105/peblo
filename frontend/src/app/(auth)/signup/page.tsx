@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles, Mail, Lock, User, Loader2 } from "lucide-react";
 import { signUpWithEmail, signInWithGoogle } from "@/lib/auth";
+import { notesApi } from "@/lib/notesApi";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -44,13 +45,8 @@ export default function SignupPage() {
     try {
       setError(null);
       const cred = await signUpWithEmail(data.name, data.email, data.password);
-      const token = await cred.user.getIdToken();
-      
       // Sync user data with backend
-      await fetch("http://localhost:8000/auth/sync", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await notesApi.syncUser();
       
       router.push("/dashboard");
     } catch (err: any) {
@@ -67,12 +63,7 @@ export default function SignupPage() {
       setIsLoadingGoogle(true);
       setError(null);
       const cred = await signInWithGoogle();
-      const token = await cred.user.getIdToken();
-      
-      await fetch("http://localhost:8000/auth/sync", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await notesApi.syncUser();
       
       router.push("/dashboard");
     } catch (err: any) {
