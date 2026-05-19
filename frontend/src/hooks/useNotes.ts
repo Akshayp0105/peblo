@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { useNotesStore } from '../store/useNotesStore';
 import { notesApi, Note } from '../lib/notesApi';
@@ -98,19 +98,20 @@ export function useNote(id: string) {
   useEffect(() => {
     if (loading || !user || !id) return;
 
-    const q = query(collection(db, 'notes'));
-    const unsubscribe = onSnapshot(collection(db, 'notes'), (snapshot) => {
-        // Find document
-        let found = false;
-        snapshot.forEach(doc => {
-            if (doc.id === id && doc.data().user_id === user.uid) {
-                setNote({ id: doc.id, ...doc.data() } as Note);
-                found = true;
-            }
-        });
-        if (!found) setNote(null);
+    const docRef = doc(db, 'notes', id);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.user_id === user.uid || data.is_public === true) {
+          setNote({ id: docSnap.id, ...data } as Note);
+        } else {
+          setNote(null);
+        }
+      } else {
+        setNote(null);
+      }
     }, (err) => {
-        setError(err);
+      setError(err);
     });
 
     return () => unsubscribe();
