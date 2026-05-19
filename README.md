@@ -154,8 +154,7 @@ Peblo Notes leverages **Google Gemini 3.1 Pro (High)** for unparalleled natural 
 | ![Insights](/assets/insights.png) | ![Share](/assets/share.png) |
 
 ## Demo Video
-
-[Watch the Peblo Notes Demo](#)
+ (will be added soon)
 
 ## Trade-offs & Future Work
 
