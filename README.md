@@ -1,4 +1,4 @@
-# Peblo Notes
+# Peblo 
 
 > AI-powered engine , elegant note-taking workspace.
 
