@@ -6,6 +6,7 @@ Peblo Notes is a sophisticated, full-stack application designed to elevate your 
 
 ## Architecture
 
+
 ```mermaid
 graph TD
     Client[Next.js Client] -->|REST/JSON| API[FastAPI Backend]
